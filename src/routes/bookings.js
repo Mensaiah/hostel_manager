@@ -8,4 +8,6 @@ router.get(
   BookingsController.checkRooms
 );
 
+router.post('/create', BookingsController.createRoom);
+
 export default router;

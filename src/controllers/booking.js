@@ -1,14 +1,15 @@
-import { Bookings, Room, RoomType } from '../models';
+import { Booking, Room, RoomType } from '../models';
 import { validationResult } from 'express-validator';
-import Sequelize, { QueryTypes } from 'sequelize';
+import { QueryTypes } from 'sequelize';
+import db from '../models';
 
 const BookingsController = {
   checkRooms: async (req, res) => {
     const { checkin, checkout, guests } = req.params;
     console.log(req.params);
     try {
-      const emptyRooms = await sequelize.query(
-        `SELECT r.room_number, price , price * ${guests} AS "totalAmount",name AS 'roomName,  (rt.number_of_beds - subquery."activeBookings") AS available_rooms
+      const emptyRooms = await db.sequelize.query(
+        `SELECT r.id as room_id , r.room_number, price , price * ${guests} AS "totalAmount",name AS roomName,  (rt.number_of_beds - subquery."activeBookings") AS available_rooms
 
       FROM "Rooms" as r
       JOIN "RoomTypes" as rt
@@ -25,7 +26,7 @@ const BookingsController = {
       ) AS subquery
       on subquery.room_id = r.id
       
-      WHERE (rt.number_of_beds - subquery."activeBookings") >= 3
+      WHERE (rt.number_of_beds - subquery."activeBookings") >= ${guests}
       
       ;`,
         {
@@ -38,6 +39,32 @@ const BookingsController = {
     } catch (error) {
       console.log(error);
       res.status(500).json('sever error');
+    }
+  },
+
+  createRoom: async (req, res) => {
+    try {
+      const {
+        id,
+
+        NumberOfGuests,
+        totalAmount,
+        checkIn,
+        checkOut
+      } = req.body;
+      const booking = await Booking.create({
+        roomId: id,
+        NumberOfGuests,
+        totalAmount,
+        checkIn,
+        checkOut,
+        dateBooked: Date.now()
+      });
+      return res.status(200).json(booking);
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).json('Server Error');
     }
   }
 };
