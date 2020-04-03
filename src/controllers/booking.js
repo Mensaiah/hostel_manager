@@ -7,7 +7,7 @@ const BookingsController = {
     const { checkin, checkout, guests } = req.params;
     console.log(req.params);
     try {
-      const emptyRooms = await Sequelize.query(
+      const emptyRooms = await sequelize.query(
         `SELECT r.room_number, price , price * ${guests} AS "totalAmount",name AS 'roomName,  (rt.number_of_beds - subquery."activeBookings") AS available_rooms
 
       FROM "Rooms" as r
